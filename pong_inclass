@@ -1,0 +1,306 @@
+// HOW TO PLAY - 
+// Use "w" and "s" to move player one
+// Use "up" and "down" key to move player two
+// Click screen to start again! 
+// Made by: Andy Sun and Eva Serrano Reisner
+
+float x, y, speedX, speedY;
+float diam = 25;
+float  rectSize = 200;
+float posRight = 500;
+float posLeft = 500;
+int scoreRight = 0;
+int scoreLeft = 0;
+ArrayList < PVector > ball = new ArrayList < PVector >();
+
+
+
+void setup() {
+  background(0);
+  fullScreen();
+  fill(255);
+  noStroke();
+  reset();
+
+}
+
+void reset() {
+  x = width/2;
+  y = height/2;
+  speedX = 10;
+  speedY = 10;
+  ball = new ArrayList < PVector >();
+}
+
+void update() {
+
+
+  //right side
+  if (x > width-150 && x < width -100 && y > posRight-200 && y < posRight+200) {
+    scoreRight +=1;
+    speedX *= -1.1;
+  } else if (x<0) {
+    scoreRight = 0;
+    scoreLeft = 0;
+  }
+
+  //left side
+  if (x > 100 && x < 150 && y > posLeft-200 && y < posLeft+200) {
+    speedX *= -1.1;
+    speedY *= 1.1;
+    scoreLeft += 1;
+  } else if (x>width) {
+    scoreRight = 0;
+    scoreLeft = 0;
+  }
+
+  //vertical hitbox
+  if (y > height || y < 0) {
+    speedY *= -1;
+  }
+}
+  
+  
+void draw() {
+  update();
+  background(0);
+  ellipse(x, y, diam, diam);
+  rect(125, posLeft, 20, rectSize);
+  rect(width-150, posRight, 20, rectSize);
+  textAlign(CENTER);
+  textSize(125);
+  text(scoreLeft, 400, 250);
+  text(scoreRight, width-400, 250);
+  
+  x += speedX;
+  y += speedY;
+  ball.add(new PVector(x, y));
+  for (int i = 0; i< ball.size(); i++) {
+    ellipse(ball.get(i).x, ball.get(i). y, 25, 25);
+  }
+
+
+}
+
+void keyPressed() {
+  if (keyCode == UP) {
+    posRight = posRight - 50;
+  } else if (keyCode == DOWN) {
+    posRight = posRight + 50;
+  } else if (key  == 'w' || key == 'W') {
+    posLeft = posLeft - 50;
+  } else if (key == 's' ||key == 'S') {
+    posLeft = posLeft + 50;
+  }
+}
+void mousePressed() {
+  reset();
+}
+
+
+On Tue, Jan 23, 2018 at 2:46 PM, Eva Serrano Reisner <serre965@newschool.edu> wrote:
+
+    import ddf.minim.*;
+    import ddf.minim.analysis.*;
+    import ddf.minim.effects.*;
+    import ddf.minim.signals.*;
+    import ddf.minim.spi.*;
+    import ddf.minim.ugens.*;
+
+    Minim minim;
+    AudioPlayer left;
+    AudioPlayer right;
+    //code from dc74089 start (edited)
+    float x, y, speedX, speedY;
+    float diam = 50;
+    float rectSize = 400;
+    //code from dc74089 stop (edited)
+
+    float directRight = 500;
+    float directLeft = 500;
+    PFont score;
+    int scoreRight = 0;
+    int scoreLeft = 0;
+
+    void setup() {
+      fullScreen();
+      minim = new Minim(this);
+
+      left = minim.loadFile("left.wav");
+      right = minim.loadFile("right.wav");
+      fill(255);
+      reset();
+    }
+
+    //code from dc74089 (edited)
+    void reset() {
+      x = width/2;
+      y = height/2;
+      speedX = random(5, 15);
+      speedY = random(5, 15);
+    }
+    //end
+
+    void draw() {  
+      background(0);
+      ellipse(x, y, diam, diam);
+
+      rect(30, directLeft, 20, rectSize);
+      rect(width-60, directRight, 20, rectSize);
+
+      score = loadFont("CourierStd-48.vlw");
+      textFont(score, 48);
+      textAlign(CENTER);
+      textSize(125);
+      text(scoreLeft, 900, 500);
+      text(scoreRight, width-900, 500);
+
+      x += speedX;
+      y += speedY;
+
+      // right
+      if ( x > width-80 && x < width -60 && y > directRight-400 && y < directRight+400 ) {
+        speedX = speedX * -1;
+        fill(random(255), random(255), random(255));
+        right.play();
+        right.rewind();
+        scoreRight +=1;
+      } else if (x< 0) {
+        scoreRight = 0;
+        scoreLeft = 0;
+        text("CLICK TO PLAY AGAIN!", width/2, 1500);
+      }
+
+      // left
+      if (x > 60 && x < 80 && y > directLeft-400 && y < directLeft+400 ) {
+        speedX *= -1.1;
+        speedY *= 1.1;
+        x += speedX;
+        fill(random(255), random(255), random(255));
+        left.play();
+        left.rewind();
+        scoreLeft +=1;
+      } else if (x>width) {
+        scoreRight = 0;
+        scoreLeft = 0;
+        text("CLICK TO PLAY AGAIN!", width/2, 1500);
+      }
+
+
+      // vertical hit, code from dc74089 
+      if ( y > height || y < 0 ) {
+        speedY *= -1;
+      }
+    }
+    //end
+    void keyPressed() {
+      if (keyCode == UP) {
+        directRight = directRight - 50;
+      } else if (keyCode == DOWN) {
+        directRight = directRight + 50;
+      } else if (key == 'w' || key == 'W') {
+        directLeft = directLeft - 50;
+      } else if (key == 's' || key == 'S') {
+        directLeft = directLeft + 50;
+      }
+    }
+    void mousePressed() {
+      reset();
+    }
+
+
+    On Tue, Jan 23, 2018 at 2:44 PM, Andy Sun <suna151@newschool.edu> wrote:
+
+        float x, y, speedX, speedY;
+        float diam = 25;
+        float  rectSize = 200;
+        float posRight = 500;
+        float posLeft = 500;
+        int scoreRight = 0;
+        int scoreLeft = 0;
+        ArrayList < PVector > ball = new ArrayList < PVector >();
+
+
+
+        void setup() {
+          background(0);
+          fullScreen();
+          fill(255);
+          noStroke();
+          reset();
+
+        }
+
+        void reset() {
+          x = width/2;
+          y = height/2;
+          speedX = 10;
+          speedY = 10;
+          ball = new ArrayList < PVector >();
+        }
+
+        void update() {
+
+
+          //right side
+          if (x > width-150 && x < width -100 && y > posRight-200 && y < posRight+200) {
+            scoreRight +=1;
+            speedX *= -1.1;
+          } else if (x<0) {
+            scoreRight = 0;
+            scoreLeft = 0;
+          }
+
+          //left side
+          if (x > 100 && x < 150 && y > posLeft-200 && y < posLeft+200) {
+            speedX *= -1.1;
+            speedY *= 1.1;
+            scoreLeft += 1;
+          } else if (x>width) {
+            scoreRight = 0;
+            scoreLeft = 0;
+            text("CLICK TO PLAY AGAIN!", 500, 500);
+          }
+
+          //vertical hitbox
+          if (y > height || y < 0) {
+            speedY *= -1;
+          }
+        }
+          
+          
+        void draw() {
+          update();
+          background(0);
+          ellipse(x, y, diam, diam);
+          rect(125, posLeft, 20, rectSize);
+          rect(width-150, posRight, 20, rectSize);
+          textAlign(CENTER);
+          textSize(125);
+          text(scoreLeft, 400, 250);
+          text(scoreRight, width-400, 250);
+          
+          x += speedX;
+          y += speedY;
+          ball.add(new PVector(x, y));
+          for (int i = 0; i< ball.size(); i++) {
+            ellipse(ball.get(i).x, ball.get(i). y, 25, 25);
+          }
+
+
+        }
+
+        void keyPressed() {
+          if (keyCode == UP) {
+            posRight = posRight - 50;
+          } else if (keyCode == DOWN) {
+            posRight = posRight + 50;
+          } else if (key  == 'w' || key == 'W') {
+            posLeft = posLeft - 50;
+          } else if (key == 's' ||key == 'S') {
+            posLeft = posLeft + 50;
+          }
+        }
+        void mousePressed() {
+          reset();
+        }
