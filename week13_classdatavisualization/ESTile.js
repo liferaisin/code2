@@ -1,4 +1,4 @@
-class JBTile extends Tile {
+class ESTile extends Tile {
 
   processData() {
     // make a counter for each response DOCTYPE
@@ -24,29 +24,50 @@ class JBTile extends Tile {
         this.care++;
       }
     }
+
   }
 
   display() {
-    noStroke();
-
-    for (let i = 0; i < this.love; i++) {
-      image(imgLove, xLove, yLove);
-      xLove += 50;
-    }
-
-    for (let i = 0; i < this.alright; i++) {
-      image(imgAlright, xAlright, yAlright);
-      xAlright += 50;
-    }
-
-    for (let i = 0; i < this.care; i++) {
-      image(imgDontCare, xCare, yCare);
-      xCare += 50;
-    }
 
     // call super class' display method so we get our
     // clean matrix and translation
     super.display();
+
+    this.imgLove;
+    this.imgAlright;
+    this.imgDontCare;
+
+    this.xLove =25;
+    this.yLove = 50;
+
+    this.xAlright = 25;
+    this.yAlright = 150;
+
+    this.xCare = 25;
+    this.yCare = 250;
+
+
+    noStroke();
+    
+
+    this.imgLove = loadImage("assets/jedi.png");
+    this.imgAlright = loadImage("assets/alright.png");
+    this.imgDontCare = loadImage("assets/dontcare.png");
+
+    for (let i = 0; i < this.love; i++) {
+      image(this.imgLove, this.xLove, this.yLove);
+      this.xLove += 50;
+    }
+
+    for (let i = 0; i < this.alright; i++) {
+      image(this.imgAlright, this.xAlright, this.yAlright);
+      this.xAlright += 50;
+    }
+
+    for (let i = 0; i < this.care; i++) {
+      image(this.imgDontCare, this.xCare, this.yCare);
+      this.xCare += 50;
+    }
 
     console.log(this.table);
   }
