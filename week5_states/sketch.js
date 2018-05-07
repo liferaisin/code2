@@ -1,74 +1,19 @@
 // Eva Serrano Reisner
 // 02/26/18
-// derek the chicken game.
-// based of something that i made in gamemaker in high school
-// and then attempted to transfer to processing last semester.
-// sprites are mine, backgrounds are from BitDay wallpaper
-// ran into trouble with displaying any images, but in theory this would work
-// CORS policy blocked them :( even my sprites
-
-let left;
-let right;
-let up;
-let down;
-let gravity = .2;
-let ground = 820;
-
-let xpos =15;
-let ypos =760;
-let x=1;
-
-let expos = 900;
-let eypos = 850;
-
-let score = 0;
-let lives = 1;
 
 let sceneStates = Object.freeze({
-  TITLE: 0,
-  TUTORIAL: 1,
-  GAME: 2,
-  WIN: 3,
-  LOSE: 4
+  BACKGROUND: 0,
+  FIRST: 1,
+  SECOND: 2,
+  TOP: 3,
 });
 
-let currentState = sceneStates.TITLE;
+let currentState = sceneStates.BACKGROUND;
 
-//image variables
-let back1;
-let back2;
-let back3;
-let back6;
-let back7;
-let weaselpic;
-
-let derekSprite;
-let eggSprite;
-
-let mouseOn = false;
-let tutorialTimer;
-
-let gameTimer;
-let gameTimePressed;
-const timeForGame = 5000;
+let keyOn = false;
 
 function setup() {
-  createCanvas(1920, 1080);
-  weaselpic = loadImage("weasel.png");
-  back1 = loadImage("1.png");
-  back2 = loadImage("data/2.png");
-  back3 = loadImage("data/3.png");
-  back6 = loadImage("data/6.png");
-  back7 = loadImage("data/7.png");
-
-  chicken = new Sprite();
-  chicken.derekShape = loadImage("derek.png");
-  chicken.position = createVector(400, ground);
-  chicken.direction = 1;
-  chicken.velocity = createVector(0, 0);
-  chicken.jumpSpeed = 10;
-  chicken.walkSpeed = 4;
-
+  createCanvas(1275, 1650);
 }
 
 function draw() {
@@ -78,227 +23,245 @@ function draw() {
 }
 
 function drawScene() {
-  switch(currentState) {
-    case sceneStates.TITLE:
-      background(back1);
-      background(255);
-      fill(582, 36, 0);
-      textSize(75);
-      textAlign(CENTER, CENTER);
-      text("Derek the Chicken", width/2, 400);
-      textSize(35);
-      text("Click to begin", width/2, 600);
+  switch (currentState) {
+    case sceneStates.BACKGROUND:
+      drawBackground();
       break;
-    case sceneStates.TUTORIAL:
-      background(back2);
-      background(255);
-      textSize(35);
-      textAlign(CENTER, CENTER);
-      text("to move, use A and D.", width/2, 200);
-      text("to jump, press space.", width/2, 300);
-      text("Collect the egg and\navoid the weasel!", width/2, 500);
-      if(millis() > tutorialTimer + 3000){ // 3000 is 3 seconds; that's the time for the tutorial to appear
-        text("Click to begin", width/2, 800);
-      }
+    case sceneStates.FIRST:
+      drawFirst();
       break;
-    case sceneStates.GAME:
-      background(back3);
-      background(255);
-
-      updateChicken();
-      weasel = new Enemy("weasel.png",35,700);
-      weasel.start();
-      egg1 = new Egg("eggu.png",100,700);
-      egg1.spawn();
-      if(chicken.position.x > 845 && chicken.position.x<900 && chicken.position.y<950 && chicken.position.y > 700 && currentState.GAME){
-        lives = 0;
-      }
-      if(chicken.position.x > 1200 && chicken.position.x<1270 && chicken.position.y<950 && chicken.position.y > 700 && currentState.GAME){
-        score = 1;
-      }
+    case sceneStates.SECOND:
+      drawSecond();
       break;
-    case sceneStates.WIN:
-      background(six);
-      background(255);
-      fill(0);
-      textSize(35);
-      textAlign(CENTER, CENTER);
-      text("YOU WON!", width/2, 500);
-      text("Click to return to title", width/2, 500);
+    case sceneStates.TOP:
+      drawTop();
       break;
-    case sceneStates.LOSE:
-      background(seven);
-      background(255);
-      fill(255);
-      textSize(35);
-      textAlign(CENTER, CENTER);
-      text("sorry, you died", width/2, 300);
-      text("Click to try again", width/2, 500);
   }
 }
 
 function checkTransition() {
-  switch (currentState) {
-    case sceneStates.TITLE:
-      if(mouseOn) {
-        currentState++;
-        setupScene();
-      }
+  switch(currentState) {
+    case sceneStates.BACKGROUND:
+      checkState();
       break;
-    case sceneStates.TUTORIAL:
-      if(millis() > tutorialTimer + 3000) {
-        if (mouseOn) {
-          currentState++;
-          setupScene(currentState);
-        }
-      }
+    case sceneStates.FIRST:
+      checkState();
       break;
-    case sceneStates.GAME:
-      if(score === 1){
-        currentState++;
-      }
-      if( lives === 0) {
-        currentState.LOSE;
-      }
+    case sceneStates.SECOND:
+      checkState();
       break;
-    case sceneStates.WIN:
-      if(mouseOn) {
-        currentState = sceneStates.TITLE;
-        setupScene();
-      }
-      break;
-    case sceneStates.LOSE:
-      if(mouseOn) {
-        currentState = sceneStates.GAME;
-        setupScene();
-      }
+    case sceneStates.TOP:
+      checkState();
       break;
   }
 }
 
 function setupScene() {
   switch(currentState) {
-    case sceneStates.TITLE:
+    case sceneStates.BACKGROUND:
       break;
-    case sceneStates.TUTORIAL:
-      tutorialTimer = millis();
+    case sceneStates.FIRST:
       break;
-    case sceneStates.GAME:
-      gameTimer = millis();
+    case sceneStates.SECOND:
       break;
   }
 }
 
-class Egg{
-  let eggImage;
+function keyPressed() {
+  keyOn = true;
+}
 
-  Egg(this.eggy, this.spawnX, this.spawnY){
-    eggImage = loadImage(eggy);
-  }
-  function spawn(){
-    image(eggImage, spawnX, spawnY);
+//
+// INTRO
+//
+
+function drawBackground() {
+  background(230,255,255);
+}
+
+function checkState() {
+  if (keyOn) {
+    currentState++;
+    setupScene();
   }
 }
 
-class Enemy{
-  let weaselImage;
+//
+// TUTORIAL
+//
 
-  Enemy(this.picture, this.expos, this.eypos){
-    weaselImage = loadImage(picture);
-  }
-  function start(){
-    image(weaselImage, expos, eypos);
-  }
+function drawFirst() {
+  noStroke();
+    fill(94,94,94);
+    triangle(302,266,482,459,262,317);
+    triangle(262,317,482,459,253,455);
+    triangle(253,455,482,459,264,516);
+    quad(264,516,482,459,543,487,272,787);
+    quad(543,487,583,479,334,875,272,787);
+    triangle(272,787,334,875,294,841);
+    quad(334,875,583,479,698,473,450,844);
+    triangle(450,844,305,884,336,1015);
+    quad(336,1015,698,473,758,485,954,1022);
+    triangle(758,485,954,1022,1019,590);
+    triangle(758,485,1019,590,1020,429);
+    triangle(758,485,1020,429,997,288);
+    triangle(758,485,997,288,945,243);
+    triangle(954,1022,1021,854,1007,672);
+    quad(336,1015,954,1022,1024,1224,275,1311);
+    quad(275,1311,1024,1224,1032,1397,309,1410);
 }
 
-class Sprite{
-  let derekShape;
-  let position;
-  let direction;
-  let velocity;
-  let jumpSpeed;
-  let walkSpeed;
+function drawSecond() {
+  fill(0);
 
-  function display(){
-    image(derekShape, xpos, ypos);
-  }
+    //forehead and ear stuff
+  triangle(407,485,462,523,435,482);
+  triangle(406,597,447,621,439,634);
+  triangle(386,622,392,659,378,638);
+  triangle(461,559,532,541,545,641);
+  quad(532,542,496,552,498,520,518,508);
+  triangle(461,558,448,605,504,600);
+  quad(503,600,481,637,453,645,469,600);
+  quad(503,599,508,659,538,668,545,638);
+  triangle(544,642,535,575,560,598);
+  quad(535,576,543,515,585,511,603,643);
+  quad(584,519,591,575,631,632,636,604);
+  quad(596,542,636,605,644,567,597,507);
+  quad(623,545,690,627,744,602,642,524);
+  quad(690,626,680,663,643,645,650,573);
+  triangle(657,536,663,489,683,557);
+  quad(690,562,711,494,764,549,744,603);
+  triangle(691,562,712,494,688,517);
+  triangle(710,494,764,550,765,509);
+  triangle(743,603,764,548,764,579);
+  quad(742,602,774,626,763,663,711,615);
+  quad(764,509,762,618,774,627,796,523);
+  quad(789,548,776,609,807,635,804,552);
+  triangle(804,583,806,653,839,596);
+  quad(838,596,876,605,855,642,832,643);
+  triangle(871,373,885,367,867,390);
+  quad(882,390,926,368,971,390,921,405);
+  triangle(893,417,927,418,871,429);
+  quad(824,419,811,457,824,504,840,496);
+  triangle(832,461,854,469,839,497);
+  triangle(907,609,888,643,889,619);
+  quad(906,609,887,643,905,662,928,650);
+  quad(906,661,873,626,870,660,888,682);
+  quad(665,669,705,705,695,730,663,723);
 
-  function moveY(){
-    ypos = ypos-1;
-  }
+    //eyes and face
+  quad(316,845,317,796,331,770,356,803);
+  quad(331,771,355,804,389,770,387,743);
+  triangle(394,804,424,822,406,797);
+  quad(414,733,450,697,469,700,474,729);
+  triangle(414,732,474,728,435,786);
+  triangle(468,700,483,786,525,721);
+  quad(524,721,510,742,537,780,585,830);
+  quad(435,786,437,781,521,822,480,808);
+  quad(490,808,540,780,550,791,540,831);
+  quad(549,791,584,828,549,884,529,873);
+  quad(997,737,996,831,952,851,948,749);
+  triangle(953,852,949,748,927,803);
+  quad(867,734,889,722,950,748,928,803);
+  triangle(948,748,902,729,931,730);
+  quad(838,749,913,712,854,696,831,730);
+  quad(866,734,839,747,816,792,841,779);
+  quad(855,696,795,784,726,735,795,690);
+  triangle(796,690,736,705,727,736);
+  quad(727,735,755,755,775,807,714,788);
+  triangle(774,807,771,800,809,796);
+  quad(776,806,714,787,696,817,754,831);
+  quad(677,811,753,830,760,872,678,859);
+  triangle(761,871,736,867,731,876);
+  quad(738,867,680,858,628,864,708,913);
+  triangle(709,911,597,845,626,1002);
+  quad(598,845,622,978,582,914,575,858);
+  quad(622,979,640,1058,600,1047,595,1019);
+  triangle(624,1003,640,1059,660,964);
+  quad(653,994,643,1038,745,1070,740,1035);
+  quad(643,1037,635,1086,645,1084,653,1040);
+  quad(649,1056,644,1084,746,1070,672,1046);
+  triangle(744,1070,750,1019,773,1066);
+  triangle(772,1066,802,996,883,1050);
+  triangle(802,997,760,1013,776,1059);
+  triangle(719,983,769,988,735,997);
+  triangle(327,925,363,888,333,945);
+  quad(362,888,332,945,415,918,423,893);
+  quad(333,944,378,929,421,952,343,964);
+  quad(343,963,487,942,405,1001,355,1004);
+  triangle(448,996,428,1010,424,1035);
+  triangle(424,1034,490,1018,457,1046);
+  triangle(480,1041,503,1019,495,1059);
+  quad(513,1086,545,1047,600,1091,531,1101);
+  triangle(588,1082,545,1048,567,1048);
+  quad(876,797,835,843,813,848,855,861);
+  triangle(864,832,854,860,915,826);
+  quad(853,860,883,843,905,849,863,863);
+  quad(876,858,904,849,925,876,899,862);
+  triangle(778,868,815,848,928,882);
+  triangle(779,867,980,887,954,1004);
+  quad(954,1002,811,891,755,904,940,1017);
+  triangle(811,892,755,905,771,885);
+  quad(797,966,836,953,898,1045,834,1009);
+  quad(834,951,898,1046,964,1106,940,1016);
+
+    //body
+  triangle(353,1051,379,1081,364,1088);
+  triangle(364,1087,399,1070,386,1160);
+  quad(354,1052,388,1163,361,1183,332,1148);
+  triangle(360,1183,418,1134,424,1206);
+  triangle(388,1161,403,1134,419,1134);
+  triangle(361,1182,423,1205,382,1200);
+  triangle(417,1134,527,1206,427,1246);
+  triangle(527,1207,468,1168,520,1184);
+  triangle(469,1228,576,1186,561,1269);
+  triangle(471,1227,560,1268,527,1262);
+  quad(560,1268,584,1198,606,1245,585,1270);
+  triangle(605,1246,545,1114,625,1197);
+  quad(530,1100,701,1276,997,1185,883,1049);
+  triangle(997,1186,967,1122,883,1050);
+  quad(632,1204,685,1258,662,1286,634,1261);
+  quad(719,1269,782,1250,801,1262,785,1295);
+  triangle(780,1250,867,1224,860,1297);
+  quad(866,1223,863,1258,953,1222,964,1194);
+  triangle(964,1194,997,1184,979,1219);
+  triangle(979,1220,959,1230,942,1288);
+  quad(996,1185,929,1312,763,1402,1001,1398);
+  quad(1000,1396,995,1180,1019,1257,1020,1332);
+  triangle(667,1405,642,1387,645,1368);
+  triangle(583,1405,604,1375,606,1396);
+  quad(513,1407,330,1410,292,1314,539,1391);
+  triangle(330,1409,293,1315,302,1380);
+  triangle(501,1380,433,1360,467,1353);
+  quad(433,1359,361,1337,348,1300,405,1334);
+  triangle(362,1338,323,1227,292,1315);
+  triangle(307,1274,296,1257,325,1224);
 }
 
-function updateChicken()
-{
-  if (chicken.position.y < ground){
-    chicken.velocity.y += gravity;
-  }
-  else{
-    chicken.velocity.y = 0;
-  }
-
-  if (chicken.position.y >= ground && up != 0){
-    chicken.velocity.y = -chicken.jumpSpeed;
-  }
-
-  chicken.velocity.x = chicken.walkSpeed * (left + right);
-
-  let nextPosition = createVector(chicken.position.x, chicken.position.y);
-  nextPosition.add(chicken.velocity);
-
-  let offset = 0;
-  if (nextPosition.x > offset && nextPosition.x < (width - offset)){
-    chicken.position.x = nextPosition.x;
-  }
-  if (nextPosition.y > offset && nextPosition.y < (height - offset)){
-    chicken.position.y = nextPosition.y;
-  }
-
-
-  pushMatrix();
-
-  translate(chicken.position.x, chicken.position.y);
-
-  scale(chicken.direction, 1);
-
-  imageMode(CENTER);
-  image(chicken.derekShape, 0, 0);
-
-  popMatrix();
-}
-
-function mousePressed() {
-  mouseOn = true;
-}
-
-function keyPressed(){
-  if (key == 'd'){
-    right = 1;
-    chicken.direction = -1;
-  }
-  if (key == 'a'){
-    left = -1;
-    chicken.direction = 1;
-  }
-  if (key == ' '){
-    up = -1;
-  }
-  if (key == 's'){
-    down = 1;
-  }
-}
-
-function keyReleased(){
-  if (key == 'd'){
-    right = 0;
-  }
-  if (key == 'a'){
-    left = 0;
-  }
-  if (key == ' '){
-    up = 0;
-  }
-  if (key == 's'){
-    down = 0;
-  }
+function drawTop() {
+  fill(239,239,239);
+  quad(346,486,370,469,379,472,362,491);
+  quad(332,506,338,521,401,498,389,492);
+  triangle(371,550,421,535,385,612);
+  triangle(343,613,377,575,386,612);
+  triangle(384,614,420,534,420,571);
+  quad(905,439,911,434,921,443,916,449);
+  triangle(950,479,921,489,939,473);
+  quad(862,507,878,530,868,553,849,534);
+  quad(408,747,457,828,440,820,397,772);
+  quad(439,800,456,828,501,850,530,835);
+  quad(566,725,560,766,582,822,601,778);
+  triangle(692,777,714,730,713,789);
+  quad(778,810,860,804,809,837,761,843);
+  quad(860,805,885,761,875,752,827,807);
+  triangle(836,798,828,807,788,809);
+  quad(475,976,481,986,507,994,481,959);
+  quad(481,960,506,994,531,971,504,957);
+  triangle(481,960,542,937,550,953);
+  triangle(506,994,549,952,568,983);
+  triangle(527,915,565,984,551,893);
+  quad(550,893,564,985,608,949,571,895);
+  triangle(707,918,768,947,683,963);
+  quad(683,962,715,956,734,969,732,982);
+  quad(820,1005,840,1013,869,1031,867,1038);
 }
